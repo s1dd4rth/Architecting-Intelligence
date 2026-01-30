@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gen AI: The Architect's Journey</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --fg: #000000;
+            --code-bg: #1e1e1e;
+            --code-fg: #d4d4d4;
+            --border-thick: 4px solid var(--fg);
+            --border-thin: 2px solid var(--fg);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg);
+            color: var(--fg);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* Slide Container */
+        .slide-container {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .slide {
+            min-width: 100vw;
+            height: 100vh;
+            padding: 1rem 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background:
+                radial-gradient(circle, #ddd 1px, transparent 1px) 0 0;
+            background-size: 30px 30px;
+        }
+
+        .slide::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .content {
+            z-index: 1;
+            width: 100%;
+            max-width: 1600px;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 4rem;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+            line-height: 0.9;
+            margin-bottom: 1rem;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            border-bottom: var(--border-thick);
+            display: inline-block;
+            padding-bottom: 0.5rem;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            background: var(--fg);
+            color: var(--bg);
+            padding: 0.3rem 0.8rem;
+            display: inline-block;
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+            font-family: 'Helvetica', sans-serif;
+            font-weight: 500;
+        }
+
+        .sub-text {
+            font-size: 0.9rem;
+            color: #555;
+            font-style: italic;
+        }
+
+        /* Layouts */
+        .split-view {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: start;
+            margin-top: 1rem;
+        }
+
+        .grid-view {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .split-layout {
+            display: grid;
+            grid-template-columns: 40% 60%;
+            gap: 2rem;
+            height: 100%;
+            align-items: center;
+        }
+
+        .text-panel {
+            padding-right: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .code-panel {
+            background: var(--code-bg);
+            color: var(--code-fg);
+            padding: 1.5rem;
+            border-radius: 10px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85rem;
+            overflow: auto;
+            box-shadow: 10px 10px 0px rgba(0, 0, 0, 0.2);
+            border: 2px solid black;
+            height: auto;
+            max-height: 700px;
+        }
+
+        /* Scrollbar Styling for Code */
+        .code-panel::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        .code-panel::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+
+        .code-panel::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 5px;
+        }
+
+        .code-panel::-webkit-scrollbar-thumb:hover {
+            background: #888;
+        }
+
+        /* Syntax Highlighting */
+        .kw {
+            color: #569cd6;
+            font-weight: bold;
+        }
+
+        .str {
+            color: #ce9178;
+        }
+
+        .func {
+            color: #dcdcaa;
+        }
+
+        .com {
+            color: #6a9955;
+            font-style: italic;
+        }
+
+        .num {
+            color: #b5cea8;
+        }
+
+        /* Elements */
+        .concept-card {
+            border: var(--border-thin);
+            padding: 1.5rem;
+            background: white;
+            transition: transform 0.2s;
+            height: 100%;
+        }
+
+        .concept-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 5px 5px 0px black;
+        }
+
+        .card-title {
+            font-weight: 900;
+            text-transform: uppercase;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        /* Navigation */
+        .controls {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            background: var(--fg);
+            color: var(--bg);
+            border: none;
+            padding: 1rem 2rem;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 5px 5px 0px #888;
+            user-select: none;
+            transition: all 0.1s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 7px 7px 0px #666;
+        }
+
+        .btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #888;
+        }
+
+        .progress {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            z-index: 1000;
+            background: white;
+            padding: 0.5rem 1rem;
+            border: var(--border-thin);
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="progress">Slide <span id="currentSlide">1</span> / <span id="totalSlides">32</span></div>
+
+    <div class="controls">
+        <button class="btn" id="btnPrev">← PREV</button>
+        <button class="btn" id="btnNext">NEXT →</button>
+    </div>
+
+    <div class="slide-container" id="slider">
+
+        <!-- SLIDE 1: INTRO -->
+        <div class="slide">
+            <div class="content fade-in" style="justify-content: center; align-items: center; text-align: center;">
+                <p style="text-transform: uppercase; letter-spacing: 2px;">Workshop by Siddarth</p>
+                <h1>Architecting Intelligence</h1>
+                <p>From The "AI Dream" to Production Systems</p>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: PRESENTERS -->
+        <div class="slide">
+            <div class="content">
+                <div style="text-align: center; margin-bottom: 3rem;">
+                    <h2>The Pilots</h2>
+                    <p>Your guides for the journey.</p>
+                </div>
+                <div class="grid-view" style="grid-template-columns: repeat(3, 1fr); gap: 4rem; text-align: center;">
+                    <div class="concept-card" style="padding: 3rem;">
+                        <h3>Siddarth</h3>
+                        <p class="sub-text">Product Strategy</p>
+                    </div>
+                    <div class="concept-card" style="padding: 3rem;">
+                        <h3>Akshay</h3>
+                        <p class="sub-text">AI Engineer</p>
+                    </div>
+                    <div class="concept-card" style="padding: 3rem;">
+                        <h3>Jeeththenthar</h3>
+                        <p class="sub-text">Application Developer</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: THE ASK -->
+        <div class="slide">
+            <div class="content">
+                <h2>The Mission</h2>
+                <p>We analyzed your registration feedback. Here is what you asked for.</p>
+
+                <div class="grid-view" style="grid-template-columns: repeat(3, 1fr); gap: 2rem;">
+                    <!-- Bucket 1: Fundamentals -->
+                    <div class="concept-card">
+                        <div class="card-title">40% THE FUNDAMENTALS</div>
+                        <p><b>"Demystify the Magic"</b></p>
+                        <ul style="margin-left: 1.5rem; font-size: 0.9rem; line-height: 1.6; color: #444;">
+                            <li>"Understand fundamentals of Gen AI"</li>
+                            <li>"Remove the fear/mystery"</li>
+                            <li>"Deep learning of real world cases"</li>
+                        </ul>
+                    </div>
+
+                    <!-- Bucket 2: Prompts -->
+                    <div class="concept-card">
+                        <div class="card-title">30% THE LANGUAGE</div>
+                        <p><b>"Master the Prompt"</b></p>
+                        <ul style="margin-left: 1.5rem; font-size: 0.9rem; line-height: 1.6; color: #444;">
+                            <li>"Design effective prompts"</li>
+                            <li>"Structure roles & context"</li>
+                            <li>"Best practices for reliable output"</li>
+                        </ul>
+                    </div>
+
+                    <!-- Bucket 3: Building -->
+                    <div class="concept-card" style="background: black; color: white;">
+                        <div class="card-title" style="border-color: white;">30% THE BUILD</div>
+                        <p><b>"Hands-on Prototypes"</b></p>
+                        <ul style="margin-left: 1.5rem; font-size: 0.9rem; line-height: 1.6; color: #ccc;">
+                            <li>"Convert ideas into working prototypes"</li>
+                            <li>"Move from manual wireframing to AI"</li>
+                            <li>"Real-world tools & code"</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem; text-align: center; border-top: 2px dashed #ccc; padding-top: 2rem;">
+                    <p style="font-weight: 900;">Common Goal: "Solve practical problems for future career & projects."
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: THE GREAT DIVIDE -->
+        <div class="slide">
+            <div class="content">
+                <h2>The Great Distinction</h2>
+                <div class="split-view">
+                    <div class="concept-card">
+                        <div class="card-title">USING AI</div>
+                        <p>Using Copilot/ChatGPT to write email, code, or generate images.</p>
+                    </div>
+                    <div class="concept-card" style="background: black; color: white;">
+                        <div class="card-title" style="border-color: white;">BUILDING AI</div>
+                        <p>Embedding models into software to create autonomous workflows.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: HISTORY -->
+        <div class="slide">
+            <div class="content">
+                <h2>The History of the Dream</h2>
+                <p>How we got here.</p>
+
+                <div class="grid-view" style="grid-template-columns: repeat(4, 1fr);">
+
+                    <!-- 1950s -->
+                    <div class="concept-card">
+                        <div class="card-title">1950s: LOGIC</div>
+                        <p><b>Symbolic AI</b></p>
+                        <p><i>The Turing Test</i></p>
+                        <hr style="margin: 10px 0; border: 0; border-top: 1px solid #ccc;">
+                        <p class="sub-text">Hand-coded rules. "If X then Y". No learning.</p>
+                    </div>
+
+                    <!-- 1990s -->
+                    <div class="concept-card">
+                        <div class="card-title">1997: STATS</div>
+                        <p><b>Machine Learning</b></p>
+                        <p><i>Deep Blue beats Kasparov</i></p>
+                        <hr style="margin: 10px 0; border: 0; border-top: 1px solid #ccc;">
+                        <p class="sub-text">Learning from data. Probability & Classification.</p>
+                    </div>
+
+                    <!-- 2012 -->
+                    <div class="concept-card">
+                        <div class="card-title">2012: VISION</div>
+                        <p><b>Deep Learning</b></p>
+                        <p><i>AlexNet (ImageNet)</i></p>
+                        <hr style="margin: 10px 0; border: 0; border-top: 1px solid #ccc;">
+                        <p class="sub-text">Neural Networks explode. Computers can "See".</p>
+                    </div>
+
+                    <!-- 2017 -->
+                    <div class="concept-card" style="border: 2px solid black;">
+                        <div class="card-title">2017: LANGUAGE</div>
+                        <p><b>The Transformer</b></p>
+                        <p><i>"Attention Is All You Need"</i></p>
+                        <hr style="margin: 10px 0; border: 0; border-top: 1px solid #ccc;">
+                        <p class="sub-text"><b>The Pivot Point.</b> AI shifts from "Classifying" to "Generating".</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: THE ACCELERATION -->
+        <div class="slide">
+            <div class="content">
+                <h2>The Evolution: From Chat to Architecture</h2>
+                <p>Mapping the releases to the concepts.</p>
+
+                <div class="grid-view" style="grid-template-columns: repeat(2, 1fr); gap: 2rem;">
+
+                    <!-- 2022-2023 -->
+                    <div class="concept-card">
+                        <div class="card-title">NOV 2022 - 2023: USING AI</div>
+                        <p><b>The Chatbot Era</b></p>
+                        <p><i>ChatGPT Released (Nov '22)</i><br><i>GitHub Copilot (General Avail.)</i></p>
+                        <hr style="margin: 10px 0; border: 0; border-top: 1px solid #ccc;">
+                        <p class="sub-text"><b>Concepts:</b> Prompt Engineering, Zero-shot, Text Gen.</p>
+                    </div>
+
+                    <!-- 2024 -->
+                    <div class="concept-card">
+                        <div class="card-title">2024: EXTENDING AI</div>
+                        <p><b>The Context Era</b></p>
+                        <p><i>Gemini 1.5 (1M Context)</i><br><i>Claude 3.5 Sonnet (Artifacts)</i></p>
+                        <hr style="margin: 10px 0; border: 0; border-top: 1px solid #ccc;">
+                        <p class="sub-text"><b>Concepts:</b> RAG, Function Calling, Multimodal (Vision).</p>
+                    </div>
+
+                    <!-- 2025 -->
+                    <div class="concept-card">
+                        <div class="card-title">2025: REASONING & TOOLS</div>
+                        <p><b>The Coding Agent Era</b></p>
+                        <p><i>OpenAI o1 (Reasoning Models)</i><br><i>Model Context Protocol (MCP)</i></p>
+                        <hr style="margin: 10px 0; border: 0; border-top: 1px solid #ccc;">
+                        <p class="sub-text"><b>Concepts:</b> System 2 Thinking, Agent Skills, Tool Use.</p>
+                    </div>
+
+                    <!-- 2026 -->
+                    <div class="concept-card" style="background: #000; color: #fff;">
+                        <div class="card-title" style="border-color: #fff;">2026: BUILDING AI</div>
+                        <p><b>The Agentic Era</b></p>
+                        <p><i>Multi-Agent Orchestrators</i><br><i>Autonomous Workflows</i></p>
+                        <hr style="margin: 10px 0; border: 0; border-top: 1px solid #555;">
+                        <p class="sub-text" style="color: #ccc;"><b>Concepts:</b> Orchestration, Persistence,
+                            Parallelism.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: THE ANATOMY (OVERVIEW) -->
+        <div class="slide">
+            <div class="content">
+                <h2>The Roadmap: Anatomy of Intelligence</h2>
+                <p>We will build this system layer by layer, mirroring human faculties.</p>
+
+                <div
+                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem; align-items: center;">
+
+                    <!-- Human Side -->
+                    <div class="concept-card"
+                        style="border: none; background: transparent; text-align: right; padding-right: 2rem; border-right: 4px solid #000;">
+                        <h3 style="background:none; color:black; padding:0; font-size: 1.5rem; margin-bottom: 2rem;">
+                            HUMAN FACULTY</h3>
+                        <p style="margin-bottom: 1.5rem;"><b>Cognition & Language</b></p>
+                        <p style="margin-bottom: 1.5rem;"><b>Memory & Knowledge</b></p>
+                        <p style="margin-bottom: 1.5rem;"><b>Action & Interaction</b></p>
+                        <p style="margin-bottom: 1.5rem;"><b>Will & Autonomy</b></p>
+                        <p style="margin-bottom: 1.5rem;"><b>Collaboration</b></p>
+                        <p style="margin-bottom: 1.5rem;"><b>Conscience & Safety</b></p>
+                    </div>
+
+                    <!-- AI Side -->
+                    <div class="concept-card" style="border: none; background: transparent; text-align: left;">
+                        <h3 style="background:none; color:black; padding:0; font-size: 1.5rem; margin-bottom: 2rem;">AI
+                            ARCHITECTURE</h3>
+                        <p style="margin-bottom: 1.5rem;">1. <b>The Brain:</b> Models (Logic) + Prompts (Language)</p>
+                        <p style="margin-bottom: 1.5rem;">2. <b>The Soul:</b> RAG, Vectors, Embeddings</p>
+                        <p style="margin-bottom: 1.5rem;">3. <b>The Hands:</b> Tools, Function Calling</p>
+                        <p style="margin-bottom: 1.5rem;">4. <b>The Agency:</b> Loops, Planning, Skills</p>
+                        <p style="margin-bottom: 1.5rem;">5. <b>The Team:</b> Orchestration, Swarms</p>
+                        <p style="margin-bottom: 1.5rem;">6. <b>The Architect:</b> Guardrails, Eval</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: THE BRAIN -->
+
+        <!-- SLIDE 8: PROMPTING -->
+        <div class="slide">
+            <div class="content">
+                <div class="split-layout">
+                    <div class="text-panel">
+                        <h3>The Brain</h3>
+                        <h2>Structured Prompting</h2>
+                        <p>The Golden Formula: Role + Context + Task + Constraints.</p>
+                    </div>
+                    <div class="code-panel">
+                        <pre>
+<span class="kw">def</span> <span class="func">get_prompt</span>(user_input):
+    role = <span class="str">"Act as a Senior Python Architect."</span>
+    context = <span class="str">"User is a junior dev."</span>
+    task = <span class="str">f"Explain this concept: {user_input}"</span>
+    const = <span class="str">"Use analogies. Max 3 sentences."</span>
+    
+    <span class="kw">return</span> <span class="str">f"{role}\n{context}\n{task}\n{const}"</span>
+</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 9: CHAIN OF THOUGHT -->
+        <div class="slide">
+            <div class="content">
+                <div class="split-layout">
+                    <div class="text-panel">
+                        <h3>The Brain</h3>
+                        <h2>Thinking Models (CoT)</h2>
+                        <p>Forcing the model to "show its work" prevents math/logic errors.</p>
+                    </div>
+                    <div class="code-panel">
+                        <pre>
+<span class="com"># Standard Prompt (Prone to error)</span>
+p1 = <span class="str">"Roger has 5 balls. He buys 2 cans of 3 balls. How many?"</span>
+
+<span class="com"># Chain of Thought Prompt</span>
+p2 = p1 + <span class="str">"""
+Let's think step by step.
+1. Start with 5 balls.
+2. 2 cans * 3 balls = 6 new balls.
+3. 5 + 6 = 11.
+Answer: 11.
+"""</span>
+</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 10: SMALL VS BIG MODELS -->
+        <div class="slide">
+            <div class="content">
+                <div class="split-layout">
+                    <div class="text-panel">
+                        <h3>The Brain</h3>
+                        <h2>Small vs Big Models</h2>
+                        <p>Don't use a PhD for grade-school math. Use "Flash" models for speed/cost, "Pro" for
+                            reasoning.</p>
+                    </div>
+                    <div class="code-panel">
+                        <pre>
+<span class="com"># Route based on complexity</span>
+
+<span class="kw">def</span> <span class="func">route_request</span>(task_type, prompt):
+    
+    <span class="kw">if</span> task_type == <span class="str">"summarization"</span>:
+        <span class="com"># Fast, Cheap</span>
+        model = <span class="str">"gemini-2.0-flash"</span> 
+    
+    <span class="kw">elif</span> task_type == <span class="str">"complex_reasoning"</span>:
+        <span class="com"># Smart, Expensive</span>
+        model = <span class="str">"gemini-1.5-pro"</span>
+        
+    <span class="kw">return</span> client.models.generate_content(
+        model=model, 
+        contents=prompt
+    )
+</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 11: CONTEXT WINDOW -->
+        <div class="slide">
+            <div class="content">
+                <div class="split-layout">
+                    <div class="text-panel">
+                        <h3>The Brain</h3>
+                        <h2>Context Window Management</h2>
+                        <p>The "RAM" of the AI. If you feed it too much history, it crashes (or forgets). You must
+                            prune.</p>
+                    </div>
+                    <div class="code-panel">
+                        <pre>
+chat_history = []
+MAX_TOKENS = <span class="num">8000</span>
+
+<span class="kw">def</span> <span class="func">add_message</span>(msg):
+    chat_history.append(msg)
+    
+    <span class="com"># Simple FIFO Truncation</span>
+    estimated_tokens = sum(len(m)/4 <span class="kw">for</span> m <span class="kw">in</span> chat_history)
+    
+    <span class="kw">while</span> estimated_tokens > MAX_TOKENS:
+        <span class="com"># Remove oldest message (Forget)</span>
+        removed = chat_history.pop(<span class="num">0</span>)
+        estimated_tokens -= len(removed)/4
+        print(<span class="str">"Memory Full. Forgetting oldest..."</span>)
+</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 12: MULTIMODAL (NEW) -->
+        <div class="slide">
+            <div class="content">
+                <div class="split-layout">
+                    <div class="text-panel">
+                        <h3>The Brain</h3>
+                        <h2>Multimodal (Vision/Audio)</h2>
+                        <p>LLMs are no longer text-only. They can "see" and "hear" natively.</p>
+                    </div>
+                    <div class="code-panel">
+                        <pre>
+<span class="kw">from</span> PIL <span class="kw">import</span> Image
+
+<span class="kw">def</span> <span class="func">analyze_image</span>(image_path):
+    img = Image.open(image_path)
+    
+    <span class="com"># Send image directly to the model</span>
+    response = client.models.generate_content(
+        model=<span class="str">"gemini-1.5-flash"</span>,
+        contents=[<span class="str">"What is broken in this machine?"</span>, img]
+    )
+    
+    <span class="kw">return</span> response.text
+</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: THE SOUL -->
+
+        <!-- SLIDE 13: EMBEDDINGS -->
+        <div class="slide">
+            <div class="content">
+                <div class="split-layout">
+                    <div class="text-panel">
+                        <h3>The Soul</h3>
+                        <h2>Embeddings</h2>
+                        <p>Turning text into coordinate lists (Vectors). Similar concepts live close together.</p>
+                    </div>
+                    <div class="code-panel">
+                        <pre>
+<span class="kw">def</span> <span class="func">get_vector</span>(text):
+    res = client.models.embed_content(
+        model=<span class="str">"text-embedding-004"</span>,
+        contents=text
+    )
+    <span class="kw">return</span> res.embeddings[<span class="num">0</span>].values
+
+v_king = get_vector(<span class="str">"King"</span>)
+v_queen = get_vector(<span class="str">"Queen"</span>)
+
+<span class="com"># Math: King - Man + Woman = Queen</span>
+similarity = np.dot(v_king, v_queen)
+</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 14: VECTOR DB -->
+        <div class="slide">
+            <div class="content">
+                <div class="split-layout">
+                    <div class="text-panel">
+                        <h3>The Soul</h3>
+                        <h2>Vector Database</h2>
+                        <p>A specialized database (Pinecone, Chroma) to store and search embeddings instantly.</p>
+                    </div>
+                    <div class="code-panel">
+                        <pre>
+<span class="com"># Simulating a Vector Store</span>
+vector_store = []
+
+<span class="kw">def</span> <span class="func">add_document</span>(doc_id, text):
+    vec = get_vector(text)
+    vector_store.append({<span class="str">"id"</span>: doc_id, <span class="str">"vector"</span>: vec, <span class="str">"text"</span>: text})
+
+<span class="kw">def</span> <span class="func">search</span>(query):
+    query_vec = get_vector(query)
+    <span class="com"># Compare query against ALL docs</span>
+    scores = [np.dot(doc[<span class="str">"vector"</span>], query_vec) <span class="kw">for</span> doc <span class="kw">in</span> vector_store]
+    best_idx = np.argmax(scores)
+    <span class="kw">return</span> vector_store[best_idx]
+</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 15: RAG -->
+        <div class="slide">
+            <div class="content">
+                <div class="split-layout">
+                    <div class="text-panel">
+                        <h3>The Soul</h3>
+                        <h2>R.A.G.</h2>
+                        <p>Retrieval Augmented Generation. Injecting private knowledge into the prompt at runtime.</p>
+                    </div>
+                    <div class="code-panel">
+                        <pre>
+query = <span class="str">"What is the refund policy?"</span>
+
+<span class="com"># 1. Retrieve</span>
+doc = search(query) <span class="com"># Found: "Refunds allowed within 30 days."</span>
+
+<span class="com"># 2. Augment</span>
+prompt = <span class="str">f"""
+Context: {doc['text']}
+User Question: {query}
+Answer using ONLY context.
+"""</span>
+
+<span class="com"># 3. Generate</span>
+print(client.models.generate_content(contents=prompt).text)
+</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: THE HANDS -->
+
+        <!-- SLIDE 16: FUNCTION CALLING -->
+        <div class="slide">
+            <div class="content">
+                <div class="split-layout">
+                    <div class="text-panel">
+                        <h3>The Hands</h3>
+                        <h2>Function Calling</h2>
+                        <p>Giving the AI a toolset. It outputs JSON, you execute code.</p>
+                    </div>
+                    <div class="code-panel">
+                        <pre>
+<span class="kw">def</span> <span class="func">turn_lights_on</span>(brightness: int):
+    <span class="kw">return</span> <span class="str">f"Lights set to {brightness}%"</span>
+
+tools = [turn_lights_on]
+
+chat = client.chats.create(
+    model=<span class="str">'gemini-2.0-flash'</span>,
+    config=types.GenerateContentConfig(tools=tools)
+)
+
+<span class="com"># User: "Dim the lights to 50%"</span>
+<span class="com"># AI Action: calls turn_lights_on(50) automatically</span>
+response = chat.send_message(<span class="str">"Dim the lights to 50%"</span>)
+</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 17: FLOW ENGINEERING -->
+        <div class="slide">
+            <div class="content">
+                <div class="split-layout">
+                    <div class="text-panel">
+                        <h3>The Hands</h3>
+                        <h2>Flow Engineering</h2>
+                        <p>Rigid, reliable chains. Unlike Agents, Flows don't "think"—they follow a script.</p>
+                    </div>
+                    <div class="code-panel">
+                        <pre>
+<span class="kw">def</span> <span class="func">blog_post_flow</span>(topic):
+    <span class="com"># Step 1: Outline</span>
+    outline = generate(<span class="str">f"Outline a post about {topic}"</span>)
+    
+    <span class="com"># Step 2: Draft</span>
+    draft = generate(<span class="str">f"Write post based on: {outline}"</span>)
+    
+    <span class="com"># Step 3: Critique</span>
+    critique = generate(<span class="str">f"Critique this draft: {draft}"</span>)
+    
+    <span class="com"># Step 4: Finalize</span>
+    final = generate(<span class="str">f"Fix draft using critique: {critique}"</span>)
+    
+    <span class="kw">return</span> final
+</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: THE AGENCY -->
+
+        <!-- SLIDE 18: AGENTS -->
+        <div class="slide">
+            <div class="content">
+                <div class="split-layout">
+                    <div class="text-panel">
+                        <h3>The Agency</h3>
+                        <h2>Autonomous Agents</h2>
+                        <p>A loop of Reasoning + Action. Think &rarr; Act &rarr; Observe.</p>
+                    </div>
+                    <div class="code-panel">
+                        <pre>
+history = <span class="str">"Goal: Book flight."</span>
+
+<span class="kw">while</span> <span class="kw">True</span>:
+    <span class="com"># 1. Think</span>
+    action = ask_ai(history)
+    
+    <span class="kw">if</span> <span class="str">"DONE"</span> <span class="kw">in</span> action: 
+        <span class="kw">break</span>
+        
+    <span class="com"># 2. Act</span>
+    <span class="kw">if</span> <span class="str">"Search"</span> <span class="kw">in</span> action:
+        result = search_api()
+        
+    <span class="com"># 3. Observe (Update Memory)</span>
+    history += <span class="str">f"Result: {result}"</span>
+</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 19: RALPH WIGGUM LOOPS -->
+        <div class="slide">
+            <div class="content">
+                <div class="split-layout">
+                    <div class="text-panel">
+                        <h3>The Agency</h3>
+                        <h2>Ralph Wiggum Loops</h2>
+                        <p><b>Anti-Pattern:</b> The agent keeps "Trying" but getting nowhere. You need detection logic.
+                        </p>
+                    </div>
+                    <div class="code-panel">
+                        <pre>
+previous_actions = []
+
+<span class="kw">def</span> <span class="func">detect_loop</span>(new_action):
+    previous_actions.append(new_action)
+    
+    <span class="com"># Check if last 3 actions are identical</span>
+    <span class="kw">if</span> previous_actions[-3:] == [new_action]*<span class="num">3</span>:
+        <span class="kw">raise</span> Exception(<span class="str">"LOOP DETECTED! Terminating."</span>)
+
+<span class="com"># Inside Agent Loop:</span>
+try:
+    detect_loop(current_action)
+except:
+    force_human_handoff()
+</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 20: AGENT SKILLS -->
+        <div class="slide">
+            <div class="content">
+                <div class="split-layout">
+                    <div class="text-panel">
+                        <h3>The Agency</h3>
+                        <h2>Agent Skills</h2>
+                        <p>Defining a Persona by the tools it possesses.</p>
+                    </div>
+                    <div class="code-panel">
+                        <pre>
+<span class="kw">class</span> <span class="func">MathAgent</span>:
+    <span class="kw">def</span> <span class="func">__init__</span>(self):
+        self.tools = [calculator, wolfram_alpha]
+        self.system_prompt = <span class="str">"You are a Mathematician."</span>
+
+<span class="kw">class</span> <span class="func">TravelAgent</span>:
+    <span class="kw">def</span> <span class="func">__init__</span>(self):
+        self.tools = [flight_search, hotel_book]
+        self.system_prompt = <span class="str">"You are a Guide."</span>
+
+<span class="com"># Distinct agents have distinct capabilities</span>
+</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: THE TEAM -->
+
+        <!-- SLIDE 21: ORCHESTRATION -->
+        <div class="slide">
+            <div class="content">
+                <div class="split-layout">
+                    <div class="text-panel">
+                        <h3>The Team</h3>
+                        <h2>Orchestration</h2>
+                        <p>A "Manager" AI delegates tasks to "Worker" AIs.</p>
+                    </div>
+                    <div class="code-panel">
+                        <pre>
+<span class="kw">def</span> <span class="func">manager_ai</span>(user_request):
+    
+    <span class="com"># 1. Plan</span>
+    plan = generate(<span class="str">f"Who should handle: {user_request}?"</span>)
+    
+    <span class="com"># 2. Delegate</span>
+    <span class="kw">if</span> <span class="str">"math"</span> <span class="kw">in</span> plan:
+        <span class="kw">return</span> MathAgent().run(user_request)
+        
+    <span class="kw">elif</span> <span class="str">"travel"</span> <span class="kw">in</span> plan:
+        <span class="kw">return</span> TravelAgent().run(user_request)
+</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 22: PARALLEL EXECUTION -->
+        <div class="slide">
+            <div class="content">
+                <div class="split-layout">
+                    <div class="text-panel">
+                        <h3>The Team</h3>
+                        <h2>Parallel Execution</h2>
+                        <p>Running multiple agents at once to reduce latency.</p>
+                    </div>
+                    <div class="code-panel">
+                        <pre>
+<span class="kw">import</span> asyncio
+
+<span class="kw">async</span> <span class="kw">def</span> <span class="func">plan_trip_async</span>():
+    
+    <span class="com"># Start both agents simultaneously</span>
+    task1 = flight_agent.search(<span class="str">"Paris"</span>)
+    task2 = hotel_agent.search(<span class="str">"Paris"</span>)
+    
+    <span class="com"># Wait for both to finish</span>
+    flight, hotel = <span class="kw">await</span> asyncio.gather(task1, task2)
+    
+    <span class="kw">return</span> combine(flight, hotel)
+</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 23: AGENT COMM -->
+        <div class="slide">
+            <div class="content">
+                <div class="split-layout">
+                    <div class="text-panel">
+                        <h3>The Team</h3>
+                        <h2>Agent-to-Agent Communication</h2>
+                        <p>Passing the output of one agent as context to another.</p>
+                    </div>
+                    <div class="code-panel">
+                        <pre>
+<span class="com"># Pipeline</span>
+
+flight_info = flight_agent.run(<span class="str">"Book flight to NYC arriving 9 PM"</span>)
+
+<span class="com"># Pass flight info to Car Agent</span>
+car_prompt = <span class="str">f"""
+Context: Flight arrives at {flight_info['arrival_time']}.
+Task: Book a taxi from JFK.
+"""</span>
+
+car_info = car_agent.run(car_prompt)
+</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: THE ARCHITECT -->
+
+        <!-- SLIDE 24: INTERPRETABILITY (NEW) -->
+        <div class="slide">
+            <div class="content">
+                <div class="split-layout">
+                    <div class="text-panel">
+                        <h3>The Architect</h3>
+                        <h2>Interpretability</h2>
+                        <p>Looking inside the Black Box. Why did the model stop? Was it blocked?</p>
+                    </div>
+                    <div class="code-panel">
+                        <pre>
+response = client.models.generate_content(
+    model=<span class="str">'gemini-2.0-flash'</span>,
+    contents=<span class="str">"How to build a bomb?"</span>
+)
+
+<span class="com"># Don't just check text. Check metadata.</span>
+print(response.prompt_feedback)
+
+<span class="kw">if</span> response.candidates[<span class="num">0</span>].finish_reason == <span class="str">"SAFETY"</span>:
+    print(<span class="str">"🚨 Alert: Model refused due to Safety settings."</span>)
+    
+<span class="kw">elif</span> response.candidates[<span class="num">0</span>].finish_reason == <span class="str">"STOP"</span>:
+    print(<span class="str">"✅ Success: Natural completion."</span>)
+</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 25: GUARDRAILS -->
+        <div class="slide">
+            <div class="content">
+                <div class="split-layout">
+                    <div class="text-panel">
+                        <h3>The Architect</h3>
+                        <h2>Guardrails</h2>
+                        <p>Using "LLM-as-a-Judge" to block unsafe inputs.</p>
+                    </div>
+                    <div class="code-panel">
+                        <pre>
+<span class="kw">def</span> <span class="func">is_safe</span>(user_input):
+    judge_prompt = <span class="str">f"Is this harmful? {user_input} Answer YES/NO"</span>
+    verdict = generate(judge_prompt)
+    
+    <span class="kw">if</span> <span class="str">"YES"</span> <span class="kw">in</span> verdict:
+        <span class="kw">return</span> <span class="kw">False</span>
+    <span class="kw">return</span> <span class="kw">True</span>
+
+<span class="kw">if</span> is_safe(prompt):
+    run_agent(prompt)
+<span class="kw">else</span>:
+    print(<span class="str">"Blocked."</span>)
+</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 26: RED TEAMING -->
+        <div class="slide">
+            <div class="content">
+                <div class="split-layout">
+                    <div class="text-panel">
+                        <h3>The Architect</h3>
+                        <h2>Red Teaming</h2>
+                        <p>Using an "Attacker" AI to find flaws in your "Victim" AI.</p>
+                    </div>
+                    <div class="code-panel">
+                        <pre>
+<span class="kw">def</span> <span class="func">red_team_attack</span>():
+    <span class="kw">for</span> i <span class="kw">in</span> range(<span class="num">100</span>):
+        <span class="com"># Generate an attack prompt</span>
+        attack = attacker_ai.generate(<span class="str">"Try to get the Victim to say a slur."</span>)
+        
+        # Test Victim
+        response = victim_ai.generate(attack)
+        
+        <span class="kw">if</span> detect_slur(response):
+            print(<span class="str">f"SUCCESS: Broken by '{attack}'"</span>)
+            log_vulnerability(attack)
+</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 27: FRAMEWORKS (NEW) -->
+        <div class="slide">
+            <div class="content">
+                <div class="split-layout">
+                    <div class="text-panel">
+                        <h3>The Architect</h3>
+                        <h2>Frameworks</h2>
+                        <p>Do you write raw Python (Native) or use a Framework (LangChain)?</p>
+                    </div>
+                    <div class="code-panel">
+                        <pre>
+<span class="com"># Option A: LangChain (Abstraction)</span>
+<span class="kw">from</span> langchain <span class="kw">import</span> LLMChain
+chain = LLMChain(llm=gemini, prompt=prompt)
+chain.run(<span class="str">"Hello"</span>)
+
+<span class="com"># Option B: Native (Control)</span>
+<span class="com"># This is what we learned today.</span>
+client.models.generate_content(contents=<span class="str">"Hello"</span>)
+
+<span class="com"># Rule of Thumb:</span>
+<span class="com"># Start Native to learn. Use Frameworks for connectors.</span>
+</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 28: FINE TUNING -->
+        <div class="slide">
+            <div class="content">
+                <div class="split-layout">
+                    <div class="text-panel">
+                        <h3>The Architect</h3>
+                        <h2>Fine-Tuning</h2>
+                        <p>Teaching the model a specific "Style" or "Language" via training examples.</p>
+                    </div>
+                    <div class="code-panel">
+                        <pre>
+<span class="com"># 1. Prepare Dataset (Thousands of examples)</span>
+training_data = [
+    {<span class="str">"input"</span>: <span class="str">"Hello"</span>, <span class="str">"output"</span>: <span class="str">"Ahoy matey!"</span>},
+    {<span class="str">"input"</span>: <span class="str">"Status?"</span>, <span class="str">"output"</span>: <span class="str">"Ship be sailing."</span>}
+]
+
+<span class="com"># 2. Start Training Job (Google GenAI SDK)</span>
+operation = client.tuned_models.create_tuned_model(
+    source_model=<span class="str">'models/gemini-1.5-flash'</span>,
+    training_data=training_data,
+    id=<span class="str">"pirate-bot-v1"</span>
+)
+
+<span class="com"># 3. Use</span>
+model = client.get_model(<span class="str">"tunedModels/pirate-bot-v1"</span>)
+</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 29: SYNTHETIC DATA -->
+        <div class="slide">
+            <div class="content">
+                <div class="split-layout">
+                    <div class="text-panel">
+                        <h3>The Architect</h3>
+                        <h2>Synthetic Data</h2>
+                        <p>Using a Big Model (Teacher) to generate training data for a Small Model (Student).</p>
+                    </div>
+                    <div class="code-panel">
+                        <pre>
+teacher = <span class="str">"gemini-1.5-pro"</span>
+dataset = []
+
+<span class="com"># Generate 1000 examples</span>
+<span class="kw">for</span> i <span class="kw">in</span> range(<span class="num">1000</span>):
+    prompt = <span class="str">"Generate a complex medical question and answer."</span>
+    qa_pair = client.models.generate_content(
+        model=teacher, 
+        contents=prompt
+    )
+    dataset.append(qa_pair)
+
+<span class="com"># Now train a cheaper model on this data</span>
+train_model(<span class="str">"gemini-flash"</span>, dataset)
+</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 30: PERSISTENT MEMORY -->
+        <div class="slide">
+            <div class="content">
+                <div class="split-layout">
+                    <div class="text-panel">
+                        <h3>The Architect</h3>
+                        <h2>Persistent Memory (Beads)</h2>
+                        <p>Pausing an agent and resuming it days later.</p>
+                    </div>
+                    <div class="code-panel">
+                        <pre>
+<span class="com"># 1. Snapshot State</span>
+state = {
+    <span class="str">"history"</span>: agent.chat_history,
+    <span class="str">"current_goal"</span>: <span class="str">"Book Hotel"</span>,
+    <span class="str">"variables"</span>: {<span class="str">"budget"</span>: <span class="num">200</span>}
+}
+
+<span class="com"># 2. Save to DB (The "Bead")</span>
+database.save_state(<span class="str">"session_123"</span>, json.dumps(state))
+
+<span class="com"># ... Days Later ...</span>
+
+<span class="com"># 3. Resume</span>
+state = database.load_state(<span class="str">"session_123"</span>)
+agent = Agent()
+agent.chat_history = state[<span class="str">"history"</span>]
+agent.resume()
+</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 31: SUMMARY -->
+        <div class="slide">
+            <div class="content">
+                <h2>The Stack Summary</h2>
+                <div class="grid-view" style="text-align: left;">
+                    <div class="concept-card"><b>1. Brain:</b> Prompts, Models, Context</div>
+                    <div class="concept-card"><b>2. Soul:</b> RAG, Vectors, Embeddings</div>
+                    <div class="concept-card"><b>3. Hands:</b> Tools, Functions, Flows</div>
+                    <div class="concept-card"><b>4. Agency:</b> Loops, Reasoners, Skills</div>
+                    <div class="concept-card"><b>5. Team:</b> Orchestration, Parallelism</div>
+                    <div class="concept-card"><b>6. Safety:</b> Guardrails, Eval</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 32: CLOSING -->
+        <div class="slide">
+            <div class="content" style="text-align: center;">
+                <h1>Build.</h1>
+                <p>The tools are in your hands.</p>
+                <div style="margin-top: 3rem;">
+                    <p>linkedin.com/in/siddarthkengadaran/</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let slideIndex = 0;
+            const slides = document.querySelectorAll('.slide');
+            const totalSlides = slides.length; // Dynamically count slides (now 32)
+            const slider = document.getElementById('slider');
+            const currentSlideEl = document.getElementById('currentSlide');
+            const totalSlidesEl = document.getElementById('totalSlides');
+            const btnPrev = document.getElementById('btnPrev');
+            const btnNext = document.getElementById('btnNext');
+
+            // Set total count in UI
+            if (totalSlidesEl) totalSlidesEl.innerText = totalSlides;
+
+            function updateSlider() {
+                const offset = slideIndex * -100;
+                slider.style.transform = `translateX(${offset}vw)`;
+                currentSlideEl.innerText = slideIndex + 1;
+            }
+
+            function nextSlide() {
+                if (slideIndex < totalSlides - 1) {
+                    slideIndex++;
+                    updateSlider();
+                }
+            }
+
+            function prevSlide() {
+                if (slideIndex > 0) {
+                    slideIndex--;
+                    updateSlider();
+                }
+            }
+
+            // Click Listeners
+            if (btnNext) btnNext.addEventListener('click', nextSlide);
+            if (btnPrev) btnPrev.addEventListener('click', prevSlide);
+
+            // Keyboard Listeners
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') nextSlide();
+                if (e.key === 'ArrowLeft') prevSlide();
+            });
+
+            // Initial render
+            updateSlider();
+        });
+    </script>
+</body>
+
+</html>
